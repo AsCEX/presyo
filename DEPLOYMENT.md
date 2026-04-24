@@ -102,7 +102,7 @@ Since you want to run a Node.js server, you should use a process manager to keep
    stderr_logfile=/var/log/presyo.err.log
    stdout_logfile=/var/log/presyo.out.log
    user=ascex
-   environment=NODE_ENV="production",PORT="3000"
+   environment=NODE_ENV="production",PORT="3111"
    ```
 
 4. Update and start:
@@ -114,7 +114,7 @@ Since you want to run a Node.js server, you should use a process manager to keep
 
 ## Step 5: Configure Apache as Reverse Proxy
 
-Apache will handle incoming web traffic and forward it to your Node.js server running on port 3000.
+Apache will handle incoming web traffic and forward it to your Node.js server running on port 3111.
 
 1. Install Apache and enable necessary modules:
    ```bash
@@ -133,8 +133,8 @@ Apache will handle incoming web traffic and forward it to your Node.js server ru
        ServerName your_domain_or_ip
 
        ProxyPreserveHost On
-       ProxyPass / http://127.0.0.1:3000/
-       ProxyPassReverse / http://127.0.0.1:3000/
+       ProxyPass / http://127.0.0.1:3111/
+       ProxyPassReverse / http://127.0.0.1:3111/
 
        ErrorLog ${APACHE_LOG_DIR}/presyo-error.log
        CustomLog ${APACHE_LOG_DIR}/presyo-access.log combined
@@ -148,9 +148,72 @@ Apache will handle incoming web traffic and forward it to your Node.js server ru
    sudo systemctl restart apache2
    ```
 
+## Verifying the Reverse Proxy
+
+To ensure your reverse proxy (Apache or Nginx) is working correctly, follow these steps:
+
+### 1. Check Configuration Syntax
+Before restarting, always check if the configuration files have any syntax errors.
+
+**For Apache:**
+```bash
+sudo apache2ctl configtest
+```
+You should see `Syntax OK`.
+
+**For Nginx:**
+```bash
+sudo nginx -t
+```
+You should see `syntax is ok` and `test is successful`.
+
+### 2. Check Service Status
+Ensure the web server is actually running.
+
+**For Apache:**
+```bash
+sudo systemctl status apache2
+```
+
+**For Nginx:**
+```bash
+sudo systemctl status nginx
+```
+
+### 3. Verify Backend Connectivity
+The reverse proxy needs the Node.js app to be reachable. Test it from the server itself:
+```bash
+curl -I http://127.0.0.1:3111
+```
+(Note: Use the port defined in your `ecosystem.config.cjs`, which is `3111` in this project).
+
+### 4. Check Reverse Proxy Response
+Test if the reverse proxy is responding on the public/local IP:
+```bash
+curl -I http://localhost
+```
+You should see a `200 OK` if it's serving the app correctly.
+
+### 5. Inspect Logs
+If you get a **502 Bad Gateway** or **503 Service Unavailable**, check the error logs:
+
+**For Apache:**
+```bash
+sudo tail -f /var/log/apache2/presyo-error.log
+```
+
+**For Nginx:**
+```bash
+sudo tail -f /var/log/nginx/error.log
+```
+
 ## Troubleshooting 503 Errors
 
 A **503 Service Unavailable** error in Apache usually means the reverse proxy cannot connect to the Node.js server.
+
+### "Connection refused" (111) Troubleshooting
+
+If you see `(111)Connection refused: AH00957` in Apache logs, it means Apache tried to connect to port 3111 but nothing was listening there, or the connection was actively rejected.
 
 1.  **Check if the Node.js server is running:**
     ```bash
@@ -158,26 +221,42 @@ A **503 Service Unavailable** error in Apache usually means the reverse proxy ca
     # OR
     sudo supervisorctl status
     ```
+    If it's `stopped` or `errored`, start/restart it.
 
-2.  **Check application logs for crashes:**
+2.  **Verify the Port and Interface:**
+    Ensure the app is listening on `127.0.0.1` or `0.0.0.0`.
     ```bash
-    pm2 logs presyo
-    # OR
-    sudo tail -f /var/log/presyo.err.log
+    sudo ss -tulpn | grep :3111
+    ```
+    Expected output should show `LISTEN` and `127.0.0.1:3111` or `*:3111`.
+
+3.  **Check for Firewall (UFW) Issues:**
+    Usually, UFW doesn't block `lo` (loopback), but it's worth checking:
+    ```bash
+    sudo ufw status
+    ```
+    If you suspect a block, ensure loopback is allowed:
+    ```bash
+    sudo ufw allow in on lo
     ```
 
-3.  **Check if the port is being listened to:**
-    ```bash
-    sudo ss -tulpn | grep :3000
-    ```
+4.  **Check for SElinux (RHEL/CentOS) or AppArmor (Ubuntu):**
+    On Ubuntu, AppArmor usually doesn't block local proxying by default, but if you've hardened the server, check `/var/log/syslog` for AppArmor denials.
 
-4.  **Test the backend directly from the server:**
+5.  **Test the backend directly from the server:**
     ```bash
-    curl -v http://127.0.0.1:3000/health
+    curl -v http://127.0.0.1:3111/health
     ```
     If this works but the website doesn't, check Apache logs:
     ```bash
     sudo tail -f /var/log/apache2/presyo-error.log
+    ```
+
+6.  **Check application logs for crashes:**
+    ```bash
+    pm2 logs presyo
+    # OR
+    sudo tail -f /var/log/presyo.err.log
     ```
 
 ## Stopping and Starting the App

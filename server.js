@@ -23,7 +23,7 @@ app.get('/health', (req, res) => {
 });
 
 // Handle SPA routing: serve index.html for all non-file requests
-app.get('*', (req, res) => {
+app.get('{*path}', (req, res) => {
   const indexPath = path.join(distPath, 'index.html');
   res.sendFile(indexPath, (err) => {
     if (err) {
