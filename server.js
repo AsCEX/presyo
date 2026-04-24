@@ -18,16 +18,21 @@ if (!fs.existsSync(distPath)) {
 
 app.use(express.static(distPath));
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', uptime: process.uptime() });
+});
+
 // Handle SPA routing: serve index.html for all non-file requests
 app.get('*', (req, res) => {
   const indexPath = path.join(distPath, 'index.html');
   res.sendFile(indexPath, (err) => {
     if (err) {
+      console.error(`Error sending index.html: ${err.message}`);
       res.status(404).send("Production build not found. Please run 'npm run build' first.");
     }
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
 });

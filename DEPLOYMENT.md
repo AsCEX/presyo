@@ -148,14 +148,40 @@ Apache will handle incoming web traffic and forward it to your Node.js server ru
    sudo systemctl restart apache2
    ```
 
-## Step 6: (Optional) SSL with Certbot (Apache)
+## Troubleshooting 503 Errors
 
-Secure your application with HTTPS:
+A **503 Service Unavailable** error in Apache usually means the reverse proxy cannot connect to the Node.js server.
 
-```bash
-sudo apt install -y certbot python3-certbot-apache
-sudo certbot --apache -d your_domain
-```
+1.  **Check if the Node.js server is running:**
+    ```bash
+    pm2 status
+    # OR
+    sudo supervisorctl status
+    ```
+
+2.  **Check application logs for crashes:**
+    ```bash
+    pm2 logs presyo
+    # OR
+    sudo tail -f /var/log/presyo.err.log
+    ```
+
+3.  **Check if the port is being listened to:**
+    ```bash
+    sudo ss -tulpn | grep :3000
+    ```
+
+4.  **Test the backend directly from the server:**
+    ```bash
+    curl -v http://127.0.0.1:3000/health
+    ```
+    If this works but the website doesn't, check Apache logs:
+    ```bash
+    sudo tail -f /var/log/apache2/presyo-error.log
+    ```
+
+5.  **Check for "dist" folder:**
+    Ensure you have run `npm run build` and the `dist` folder exists in your project directory.
 
 ## Alternative: Deployment with Nginx
 
