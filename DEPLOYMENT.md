@@ -180,6 +180,74 @@ A **503 Service Unavailable** error in Apache usually means the reverse proxy ca
     sudo tail -f /var/log/apache2/presyo-error.log
     ```
 
+## Stopping and Starting the App
+
+If you need to stop the application completely:
+
+### Option A: Using PM2
+
+To stop the process:
+```bash
+pm2 stop presyo
+```
+Or if using the ecosystem file:
+```bash
+pm2 stop ecosystem.config.cjs
+```
+
+To start it again:
+```bash
+pm2 start ecosystem.config.cjs
+```
+
+To delete the process from PM2's list:
+```bash
+pm2 delete presyo
+```
+
+### Option B: Using Supervisor
+
+To stop the process:
+```bash
+sudo supervisorctl stop presyo
+```
+
+To start it again:
+```bash
+sudo supervisorctl start presyo
+```
+
+## Redeployment (Updating the App)
+
+When you have new changes and want to update the production app, you don't necessarily need to `stop` PM2. Instead, follow these steps:
+
+1.  **Pull the latest code:**
+    ```bash
+    git pull origin main
+    ```
+
+2.  **Install any new dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Build the project:**
+    ```bash
+    npm run build
+    ```
+
+4.  **Reload the process (Zero-Downtime):**
+    If using PM2 with an ecosystem file:
+    ```bash
+    pm2 reload ecosystem.config.cjs
+    ```
+    `reload` is better than `restart` because it restarts processes one by one, keeping the app online.
+
+    If using Supervisor:
+    ```bash
+    sudo supervisorctl restart presyo
+    ```
+
 5.  **Check for "dist" folder:**
     Ensure you have run `npm run build` and the `dist` folder exists in your project directory.
 
