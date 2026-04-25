@@ -48,11 +48,13 @@ export const Products: React.FC = () => {
     {
       header: "Name",
       accessorKey: "name",
+      className: '!p-2 text-left font-medium text-muted-foreground uppercase text-[10px] w-[200px] min-w-[200px]',
       cell: (row) => <div className="font-medium">{row.name}</div>,
     },
     {
       header: "Description",
       accessorKey: "description",
+      className: '!p-2 text-left font-medium text-muted-foreground uppercase text-[10px] w-[200px] min-w-[200px]',
       cell: (row) => (
         <div className="max-w-[300px] truncate text-muted-foreground">
           {row.description || "N/A"}
@@ -60,11 +62,8 @@ export const Products: React.FC = () => {
       ),
     },
     {
-      header: "Created At",
-      cell: (row) => new Date(row.createdAt).toLocaleDateString(),
-    },
-    {
       header: "Total Cost",
+      className: '!p-2 text-left font-medium text-muted-foreground uppercase text-[10px] w-[200px] min-w-[200px]',
       cell: (row) => {
         const total = row.costs.reduce((sum, item) => {
           const costPerUnit = item.purchasedQty > 0 ? item.purchasedCost / item.purchasedQty : 0;
@@ -75,6 +74,7 @@ export const Products: React.FC = () => {
     },
     {
       header: "Selling Price",
+      className: '!p-2 text-left font-medium text-muted-foreground uppercase text-[10px] w-[200px] min-w-[200px]',
       cell: (row) => {
         const total = row.costs.reduce((sum, item) => {
           const costPerUnit = item.purchasedQty > 0 ? item.purchasedCost / item.purchasedQty : 0;
@@ -91,6 +91,7 @@ export const Products: React.FC = () => {
     },
     {
       header: "Actions",
+      className: '!p-2 text-left font-medium text-muted-foreground uppercase text-[10px] w-[200px] min-w-[200px]',
       cell: (row) => (
         <div className="flex gap-2">
           <Button

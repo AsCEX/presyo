@@ -172,7 +172,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ open, onOpenChange, 
                 </Button>
               </div>
 
-              <div className="overflow-x-auto border rounded-lg">
+              <div className="overflow-x-auto border rounded-lg pb-6">
                 <table className="w-full text-sm border-collapse min-w-[800px] table-fixed">
                   <thead>
                     <tr className="bg-muted/50 border-b">

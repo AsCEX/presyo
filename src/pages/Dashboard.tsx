@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { api, Product, ProductInput } from "../api/mockApi";
 import { Layout } from "../components/Layout";
 import { ProductModal } from "../components/ProductModal";
+import {
+  Plus
+} from "lucide-react";
 
 export const Dashboard: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -52,9 +55,9 @@ export const Dashboard: React.FC = () => {
           </div>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="w-1/2 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
-            + Add Product
+            <Plus className="h-4 w-4" />
           </button>
         </div>
 
