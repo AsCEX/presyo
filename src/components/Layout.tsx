@@ -9,8 +9,11 @@ import {
   Settings, 
   LogOut, 
   ChevronLeft, 
-  ChevronRight 
+  ChevronRight,
+  Menu,
+  X 
 } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -23,6 +26,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title, activePath }) =
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
     localStorage.getItem("sidebar_collapsed") === "true"
   );
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const currentUser = api.getCurrentUser();
@@ -46,6 +50,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title, activePath }) =
 
   const navigate = (path: string) => {
     window.dispatchEvent(new CustomEvent("navigate", { detail: path }));
+    setIsMobileMenuOpen(false);
   };
 
   if (!user) return null;
@@ -59,11 +64,20 @@ export const Layout: React.FC<LayoutProps> = ({ children, title, activePath }) =
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
         className={cn(
-          "relative flex flex-col border-r bg-card transition-all duration-300 ease-in-out",
-          isSidebarCollapsed ? "w-16" : "w-64"
+          "fixed inset-y-0 left-0 z-50 flex flex-col border-r bg-card transition-all duration-300 ease-in-out md:relative md:translate-x-0",
+          isSidebarCollapsed ? "w-16" : "w-64",
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex h-16 items-center border-b px-4">
@@ -77,44 +91,66 @@ export const Layout: React.FC<LayoutProps> = ({ children, title, activePath }) =
 
         <nav className="flex-1 space-y-1 p-2">
           {navItems.map((item) => (
-            <button
+            <Button
               key={item.id}
+              variant="ghost"
               onClick={() => navigate(item.id)}
               className={cn(
-                "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                "w-full justify-start gap-3 px-3 py-2 text-sm font-medium",
                 activePath === item.id ? "bg-accent text-accent-foreground" : ""
               )}
             >
               <item.icon className="h-4 w-4" />
               {!isSidebarCollapsed && <span>{item.label}</span>}
-            </button>
+            </Button>
           ))}
         </nav>
 
         <div className="border-t p-2">
-          <button
+          <Button
+            variant="ghost"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+            className="w-full justify-start gap-3 px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
           >
             <LogOut className="h-4 w-4" />
             {!isSidebarCollapsed && <span>Logout</span>}
-          </button>
+          </Button>
         </div>
 
         {/* Sidebar Toggle */}
-        <button
+        <Button
+          variant="outline"
+          size="icon"
           onClick={toggleSidebar}
-          className="absolute -right-3 top-20 flex h-6 w-6 items-center justify-center rounded-full border bg-background shadow-sm hover:bg-accent"
+          className="absolute -right-3 top-20 hidden h-6 w-6 rounded-full bg-background shadow-sm md:flex"
         >
           {isSidebarCollapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
-        </button>
+        </Button>
+
+        {/* Mobile Close Button */}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="absolute right-4 top-4 h-8 w-8 md:hidden"
+        >
+          <X size={18} />
+        </Button>
       </aside>
 
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex h-16 items-center justify-between border-b bg-card px-6">
+        <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6">
           <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="h-9 w-9 md:hidden"
+            >
+              <Menu size={20} />
+            </Button>
             <h1 className="text-lg font-semibold">{title}</h1>
           </div>
           <div className="flex items-center gap-4">

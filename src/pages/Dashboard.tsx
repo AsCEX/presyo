@@ -67,10 +67,10 @@ export const Dashboard: React.FC = () => {
             </div>
           ) : (
             products.map((product) => {
-              const totalCost = product.costs.reduce(
-                (sum, item) => sum + item.price * item.quantity,
-                0
-              );
+              const totalCost = product.costs.reduce((sum, item) => {
+                const costPerUnit = item.purchasedQty > 0 ? item.purchasedCost / item.purchasedQty : 0;
+                return sum + (costPerUnit * item.weight);
+              }, 0);
               return (
                 <div
                   key={product.id}
@@ -104,20 +104,21 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {isAddModalOpen && (
-        <ProductModal
-          onSave={handleCreateProduct}
-          onClose={() => setIsAddModalOpen(false)}
-        />
-      )}
-
-      {editingProduct && (
-        <ProductModal
-          product={editingProduct}
-          onSave={handleUpdateProduct}
-          onClose={() => setEditingProduct(null)}
-        />
-      )}
+      <ProductModal
+        open={isAddModalOpen || !!editingProduct}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsAddModalOpen(false);
+            setEditingProduct(null);
+          }
+        }}
+        product={editingProduct || undefined}
+        onSave={editingProduct ? handleUpdateProduct : handleCreateProduct}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setEditingProduct(null);
+        }}
+      />
     </Layout>
   );
 };

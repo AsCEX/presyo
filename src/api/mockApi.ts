@@ -8,8 +8,11 @@ export interface User {
 
 export interface CostItem {
   name: string;
-  price: number;
-  quantity: number;
+  weight: number;
+  unit: 'g' | 'kg' | 'pcs' | 'sheets';
+  purchasedCost: number;
+  purchasedQty: number;
+  purchasedUnit: 'g' | 'kg' | 'pcs' | 'sheets';
 }
 
 export interface Product {

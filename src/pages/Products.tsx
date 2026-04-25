@@ -3,6 +3,7 @@ import { api, Product, ProductInput } from "../api/mockApi";
 import { Layout } from "../components/Layout";
 import { DataTable, ColumnDef } from "../components/ui/DataTable";
 import { ProductModal } from "../components/ProductModal";
+import { Button } from "@/components/ui/Button";
 
 export const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -65,26 +66,33 @@ export const Products: React.FC = () => {
     {
       header: "Total Cost",
       cell: (row) => {
-        const total = row.costs.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        return <div className="font-bold">₱{total.toLocaleString()}</div>;
+        const total = row.costs.reduce((sum, item) => {
+          const costPerUnit = item.purchasedQty > 0 ? item.purchasedCost / item.purchasedQty : 0;
+          return sum + (costPerUnit * item.weight);
+        }, 0);
+        return <div className="font-bold">₱{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>;
       },
     },
     {
       header: "Actions",
       cell: (row) => (
         <div className="flex gap-2">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setEditingProduct(row)}
-            className="rounded-md border px-2 py-1 text-xs font-medium hover:bg-accent"
+            className="h-8 px-2 text-xs"
           >
             Edit
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => handleDeleteProduct(row.id)}
-            className="rounded-md border border-destructive/20 px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
+            className="h-8 px-2 text-xs border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive"
           >
             Delete
-          </button>
+          </Button>
         </div>
       ),
     },
@@ -98,12 +106,11 @@ export const Products: React.FC = () => {
             <h2 className="text-2xl font-bold tracking-tight">Product Catalog</h2>
             <p className="text-muted-foreground">Manage your products and their costs here.</p>
           </div>
-          <button
+          <Button
             onClick={() => setIsAddModalOpen(true)}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             + Add Product
-          </button>
+          </Button>
         </div>
 
         {isLoading ? (
@@ -113,20 +120,21 @@ export const Products: React.FC = () => {
         )}
       </div>
 
-      {isAddModalOpen && (
-        <ProductModal
-          onSave={handleCreateProduct}
-          onClose={() => setIsAddModalOpen(false)}
-        />
-      )}
-
-      {editingProduct && (
-        <ProductModal
-          product={editingProduct}
-          onSave={handleUpdateProduct}
-          onClose={() => setEditingProduct(null)}
-        />
-      )}
+      <ProductModal
+        open={isAddModalOpen || !!editingProduct}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsAddModalOpen(false);
+            setEditingProduct(null);
+          }
+        }}
+        product={editingProduct || undefined}
+        onSave={editingProduct ? handleUpdateProduct : handleCreateProduct}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setEditingProduct(null);
+        }}
+      />
     </Layout>
   );
 };
