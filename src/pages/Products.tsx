@@ -70,7 +70,23 @@ export const Products: React.FC = () => {
           const costPerUnit = item.purchasedQty > 0 ? item.purchasedCost / item.purchasedQty : 0;
           return sum + (costPerUnit * item.weight);
         }, 0);
-        return <div className="font-bold">₱{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>;
+        return <div className="font-medium text-muted-foreground">₱{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>;
+      },
+    },
+    {
+      header: "Selling Price",
+      cell: (row) => {
+        const total = row.costs.reduce((sum, item) => {
+          const costPerUnit = item.purchasedQty > 0 ? item.purchasedCost / item.purchasedQty : 0;
+          return sum + (costPerUnit * item.weight);
+        }, 0);
+        const sellingPrice = total * (1 + (row.marginProfit || 0) / 100);
+        return (
+          <div className="flex flex-col">
+            <div className="font-bold">₱{sellingPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <div className="text-[10px] text-primary font-medium">{row.marginProfit || 0}% Margin</div>
+          </div>
+        );
       },
     },
     {

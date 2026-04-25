@@ -45,14 +45,14 @@ export const Dashboard: React.FC = () => {
   return (
     <Layout title="Dashboard" activePath="dashboard">
       <div className="grid gap-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Welcome back!</h2>
-            <p className="text-muted-foreground">Here's an overview of your costing projects.</p>
+            <h2 className="text-xl font-bold tracking-tight">Welcome back!</h2>
+            <p className="text-xs text-muted-foreground">Here's an overview of your costing projects.</p>
           </div>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="w-1/2 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             + Add Product
           </button>
@@ -71,30 +71,44 @@ export const Dashboard: React.FC = () => {
                 const costPerUnit = item.purchasedQty > 0 ? item.purchasedCost / item.purchasedQty : 0;
                 return sum + (costPerUnit * item.weight);
               }, 0);
+              const sellingPrice = totalCost * (1 + (product.marginProfit || 0) / 100);
               return (
                 <div
                   key={product.id}
-                  className="group relative rounded-lg border bg-card p-6 shadow-sm transition-all hover:shadow-md"
+                  className="group relative rounded-lg border bg-card p-6 shadow-sm transition-all hover:shadow-md flex flex-col"
                 >
-                  <div className="flex flex-col gap-2">
-                    <h3 className="font-semibold leading-none tracking-tight">{product.name}</h3>
-                    <p className="text-sm text-muted-foreground">{product.description || "No description"}</p>
+                  <div className="flex flex-col gap-2 flex-1">
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-semibold leading-none tracking-tight">{product.name}</h3>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                        {product.marginProfit || 0}% Margin
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{product.description || "No description"}</p>
                   </div>
-                  <div className="mt-4 flex items-center justify-between">
-                    <div className="text-lg font-bold">₱{totalCost.toLocaleString()}</div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setEditingProduct(product)}
-                        className="rounded-md border px-2 py-1 text-xs font-medium hover:bg-accent"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProduct(product.id)}
-                        className="rounded-md border border-destructive/20 px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
-                      >
-                        Delete
-                      </button>
+                  <div className="mt-4">
+                    <div className="flex items-baseline gap-1">
+                      <div className="text-2xl font-bold text-primary">₱{sellingPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                      <div className="text-[10px] text-muted-foreground uppercase font-semibold">Selling Price</div>
+                    </div>
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                      <div className="text-xs text-muted-foreground font-medium">
+                        Cost: ₱{totalCost.toLocaleString()}
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setEditingProduct(product)}
+                          className="rounded-md border px-2 py-1 text-xs font-medium hover:bg-accent"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(product.id)}
+                          className="rounded-md border border-destructive/20 px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

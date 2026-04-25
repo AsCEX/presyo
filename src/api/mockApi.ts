@@ -20,6 +20,7 @@ export interface Product {
   name: string;
   description: string;
   costs: CostItem[];
+  marginProfit: number; // Percentage
   createdAt: string;
 }
 
