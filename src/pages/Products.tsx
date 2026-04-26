@@ -81,9 +81,11 @@ export const Products: React.FC = () => {
           return sum + (costPerUnit * item.weight);
         }, 0);
         const sellingPrice = total * (1 + (row.marginProfit || 0) / 100);
+        const unitPrice = row.qty > 0 ? sellingPrice / row.qty : 0;
         return (
           <div className="flex flex-col">
-            <div className="font-bold">₱{sellingPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <div className="font-bold">₱{unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <div className="text-[10px] text-muted-foreground">₱{sellingPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Total • {row.qty} qty</div>
             <div className="text-[10px] text-primary font-medium">{row.marginProfit || 0}% Margin</div>
           </div>
         );

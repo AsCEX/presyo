@@ -19,6 +19,7 @@ export interface Product {
   id: string;
   name: string;
   description: string;
+  qty: number;
   costs: CostItem[];
   marginProfit: number; // Percentage
   createdAt: string;

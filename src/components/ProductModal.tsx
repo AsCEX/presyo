@@ -20,6 +20,7 @@ interface ProductModalProps {
 export const ProductModal: React.FC<ProductModalProps> = ({ open, onOpenChange, product, onSave, onClose }) => {
   const [name, setName] = useState(product?.name || "");
   const [description, setDescription] = useState(product?.description || "");
+  const [qty, setQty] = useState(product?.qty || 1);
   const [marginProfit, setMarginProfit] = useState(product?.marginProfit || 0);
   const [costs, setCosts] = useState<CostItem[]>(
     product ? [...product.costs] : [{ 
@@ -36,6 +37,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ open, onOpenChange, 
   React.useEffect(() => {
     setName(product?.name || "");
     setDescription(product?.description || "");
+    setQty(product?.qty || 1);
     setMarginProfit(product?.marginProfit || 0);
     setCosts(product ? [...product.costs] : [{ 
       name: "", 
@@ -89,6 +91,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ open, onOpenChange, 
     onSave({
       name,
       description,
+      qty,
       marginProfit,
       costs: costs.filter((c) => c.name.trim() !== ""),
     });
@@ -103,7 +106,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ open, onOpenChange, 
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Product Name</label>
                 <input
@@ -113,6 +116,20 @@ export const ProductModal: React.FC<ProductModalProps> = ({ open, onOpenChange, 
                   required
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   placeholder="e.g. Custom Cabinet"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Yield Qty</label>
+                <input
+                  type="number"
+                  value={qty}
+                  onChange={(e) => setQty(parseFloat(e.target.value) || 0)}
+                  required
+                  min="0.01"
+                  step="1"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  placeholder="e.g. 1"
                 />
               </div>
 
@@ -152,12 +169,21 @@ export const ProductModal: React.FC<ProductModalProps> = ({ open, onOpenChange, 
                     }, 0).toFixed(2)}</div>
                   </div>
                   <div>
-                    <span className="text-xs uppercase text-muted-foreground font-semibold">Selling Price</span>
-                    <div className="text-xl font-bold text-primary">
+                    <span className="text-xs uppercase text-muted-foreground font-semibold">Total Selling Price</span>
+                    <div className="text-xl font-bold">
                       ₱{(costs.reduce((sum, item) => {
                         const costPerUnit = item.purchasedQty > 0 ? item.purchasedCost / item.purchasedQty : 0;
                         return sum + (costPerUnit * item.weight);
                       }, 0) * (1 + marginProfit / 100)).toFixed(2)}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-xs uppercase text-muted-foreground font-semibold">Price per Qty</span>
+                    <div className="text-xl font-bold text-primary">
+                      ₱{(qty > 0 ? (costs.reduce((sum, item) => {
+                        const costPerUnit = item.purchasedQty > 0 ? item.purchasedCost / item.purchasedQty : 0;
+                        return sum + (costPerUnit * item.weight);
+                      }, 0) * (1 + marginProfit / 100)) / qty : 0).toFixed(2)}
                     </div>
                   </div>
                 </div>

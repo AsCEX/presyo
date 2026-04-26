@@ -75,6 +75,7 @@ export const Dashboard: React.FC = () => {
                 return sum + (costPerUnit * item.weight);
               }, 0);
               const sellingPrice = totalCost * (1 + (product.marginProfit || 0) / 100);
+              const unitPrice = product.qty > 0 ? sellingPrice / product.qty : 0;
               return (
                 <div
                   key={product.id}
@@ -88,12 +89,16 @@ export const Dashboard: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-2">{product.description || "No description"}</p>
+                    <div className="text-[10px] text-muted-foreground font-medium mt-1">
+                      Yield: {product.qty} units
+                    </div>
                   </div>
                   <div className="mt-4">
                     <div className="flex items-baseline gap-1">
-                      <div className="text-2xl font-bold text-primary">₱{sellingPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                      <div className="text-[10px] text-muted-foreground uppercase font-semibold">Selling Price</div>
+                      <div className="text-2xl font-bold text-primary">₱{unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                      <div className="text-[10px] text-muted-foreground uppercase font-semibold">Per Unit</div>
                     </div>
+                    <div className="text-[10px] text-muted-foreground">Total: ₱{sellingPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                     <div className="flex items-center justify-between mt-4 pt-4 border-t">
                       <div className="text-xs text-muted-foreground font-medium">
                         Cost: ₱{totalCost.toLocaleString()}
