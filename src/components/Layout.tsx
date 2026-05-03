@@ -11,7 +11,8 @@ import {
   ChevronLeft, 
   ChevronRight,
   Menu,
-  X 
+  X,
+  Fingerprint
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -27,6 +28,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title, activePath }) =
     localStorage.getItem("sidebar_collapsed") === "true"
   );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hasPasskey, setHasPasskey] = useState(false);
 
   useEffect(() => {
     const currentUser = api.getCurrentUser();
@@ -35,7 +37,19 @@ export const Layout: React.FC<LayoutProps> = ({ children, title, activePath }) =
       return;
     }
     setUser(currentUser);
+    setHasPasskey(api.hasPasskey());
   }, []);
+
+  const handleRegisterPasskey = async () => {
+    try {
+      // In a real app, we would call navigator.credentials.create() here
+      await api.registerPasskey();
+      setHasPasskey(true);
+      alert("Passkey registered successfully! You can now use biometrics to login.");
+    } catch (err) {
+      alert("Failed to register passkey.");
+    }
+  };
 
   const toggleSidebar = () => {
     const newState = !isSidebarCollapsed;
@@ -154,6 +168,17 @@ export const Layout: React.FC<LayoutProps> = ({ children, title, activePath }) =
             <h1 className="text-lg font-semibold">{title}</h1>
           </div>
           <div className="flex items-center gap-4">
+            {!hasPasskey && window.PublicKeyCredential && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRegisterPasskey}
+                className="hidden gap-2 md:flex border-primary/20 hover:bg-primary/5"
+              >
+                <Fingerprint className="h-4 w-4 text-primary" />
+                <span>Enable Passkey</span>
+              </Button>
+            )}
             <ThemeToggle />
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">

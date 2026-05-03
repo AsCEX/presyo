@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { api } from "../api/mockApi";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { Fingerprint } from "lucide-react";
 
 interface LoginProps {
   onLoginSuccess: () => void;
@@ -10,6 +11,30 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("admin");
   const [error, setError] = useState<string | null>(null);
+  const [isWebAuthnSupported, setIsWebAuthnSupported] = useState(false);
+
+  useEffect(() => {
+    // Check if WebAuthn is supported and if user has a registered passkey
+    if (window.PublicKeyCredential) {
+      setIsWebAuthnSupported(true);
+      if (api.hasPasskey()) {
+        handleWebAuthnLogin();
+      }
+    }
+  }, []);
+
+  const handleWebAuthnLogin = async () => {
+    setError(null);
+    try {
+      // In a real app, we would call navigator.credentials.get() here
+      const response = await api.webAuthnLogin();
+      if (response.ok) {
+        onLoginSuccess();
+      }
+    } catch (err) {
+      setError("Passkey authentication failed");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +59,27 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           <h1 className="text-2xl font-semibold tracking-tight">Presyo Login</h1>
           <p className="text-sm text-muted-foreground">Enter your credentials to access your dashboard</p>
         </div>
+
+        {isWebAuthnSupported && api.hasPasskey() && (
+          <div className="mt-6">
+            <button
+              onClick={handleWebAuthnLogin}
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-primary bg-background px-4 py-2 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-accent"
+            >
+              <Fingerprint className="h-4 w-4" />
+              Sign in with Passkey
+            </button>
+            <div className="relative mt-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium leading-none">Username</label>

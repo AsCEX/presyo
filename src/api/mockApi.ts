@@ -60,6 +60,25 @@ export const api = {
     return mockFetch({ message: "Invalid credentials" }, false);
   },
 
+  webAuthnLogin: async (): Promise<{ ok: boolean; json: () => Promise<any> }> => {
+    const hasPasskey = localStorage.getItem("presyo_passkey");
+    if (hasPasskey) {
+      const user: User = { id: 1, username: "admin", name: "Administrator" };
+      localStorage.setItem("presyo_user", JSON.stringify(user));
+      return mockFetch(user);
+    }
+    return mockFetch({ message: "No passkey registered" }, false);
+  },
+
+  registerPasskey: async (): Promise<{ ok: boolean; json: () => Promise<any> }> => {
+    localStorage.setItem("presyo_passkey", "true");
+    return mockFetch({ success: true });
+  },
+
+  hasPasskey: (): boolean => {
+    return localStorage.getItem("presyo_passkey") === "true";
+  },
+
   logout: () => {
     localStorage.removeItem("presyo_user");
   },
