@@ -4,9 +4,7 @@ import { cn } from "../lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
 import { 
   LayoutDashboard, 
-  Package, 
-  Users, 
-  Settings, 
+  Package,
   LogOut, 
   ChevronLeft, 
   ChevronRight,
@@ -123,8 +121,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, title, activePath }) =
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "products", label: "Products", icon: Package },
-    { id: "customers", label: "Customers", icon: Users },
-    { id: "settings", label: "Settings", icon: Settings },
+    /*{ id: "customers", label: "Customers", icon: Users },
+    { id: "settings", label: "Settings", icon: Settings },*/
   ];
 
   return (
