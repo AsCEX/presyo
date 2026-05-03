@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../api/mockApi";
 import { ThemeToggle } from "../components/ThemeToggle";
-import { Fingerprint } from "lucide-react";
+import { Fingerprint, ShieldOff } from "lucide-react";
 import { base64URLToBuffer } from "../lib/webauthnUtils";
 
 interface LoginProps {
@@ -63,6 +63,14 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     }
   };
 
+  const handleClearPasskey = () => {
+    if (confirm("Are you sure you want to clear your registered passkey? You will need to use your password to login next time.")) {
+      api.clearPasskey();
+      // Force a re-render to hide the passkey login button
+      window.location.reload();
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -88,13 +96,20 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         </div>
 
         {isWebAuthnSupported && api.hasPasskey() ? (
-          <div className="mt-6">
+          <div className="mt-6 flex flex-col gap-4">
             <button
               onClick={handleWebAuthnLogin}
-              className="flex flex-col w-full items-center justify-center gap-4 rounded-md px-4 py-8 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-accent"
+              className="flex flex-col w-full items-center justify-center gap-4 rounded-md px-4 py-8 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-accent border border-primary/20"
             >
               <Fingerprint className="h-16 w-16" />
               Sign in with Passkey
+            </button>
+            <button
+              onClick={handleClearPasskey}
+              className="flex items-center justify-center gap-2 w-full py-2 text-xs font-medium text-destructive hover:underline"
+            >
+              <ShieldOff className="h-3 w-3" />
+              Clear Passkey
             </button>
           </div>
         )
