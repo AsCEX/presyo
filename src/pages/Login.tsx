@@ -91,19 +91,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           <div className="mt-6">
             <button
               onClick={handleWebAuthnLogin}
-              className="flex w-full items-center justify-center gap-2 rounded-md border border-primary bg-background px-4 py-2 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-accent"
+              className="flex flex-col w-full items-center justify-center gap-4 rounded-md px-4 py-8 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-accent"
             >
-              <Fingerprint className="h-4 w-4" />
+              <Fingerprint className="h-16 w-16" />
               Sign in with Passkey
             </button>
-            <div className="relative mt-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
           </div>
         )
         :
