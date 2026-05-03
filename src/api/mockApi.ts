@@ -54,7 +54,7 @@ export const api = {
   login: async (username: string, password: string): Promise<{ ok: boolean; json: () => Promise<any> }> => {
     if (username === "admin" && password === "admin") {
       const user: User = { id: 1, username: "admin", name: "Administrator" };
-      localStorage.setItem("presyo_user", JSON.stringify(user));
+      sessionStorage.setItem("presyo_user", JSON.stringify(user));
       return mockFetch(user);
     }
     return mockFetch({ message: "Invalid credentials" }, false);
@@ -66,7 +66,7 @@ export const api = {
       const parsed = JSON.parse(storedCredential);
       if (parsed.id === credentialId) {
         const user: User = { id: 1, username: "admin", name: "Administrator" };
-        localStorage.setItem("presyo_user", JSON.stringify(user));
+        sessionStorage.setItem("presyo_user", JSON.stringify(user));
         return mockFetch(user);
       }
     }
@@ -79,6 +79,11 @@ export const api = {
     return mockFetch({ success: true });
   },
 
+  clearPasskey: (): void => {
+    localStorage.removeItem("presyo_passkey");
+    localStorage.removeItem("presyo_passkey_data");
+  },
+
   getPasskeyData: (): any => {
     const data = localStorage.getItem("presyo_passkey_data");
     return data ? JSON.parse(data) : null;
@@ -89,11 +94,11 @@ export const api = {
   },
 
   logout: () => {
-    localStorage.removeItem("presyo_user");
+    sessionStorage.removeItem("presyo_user");
   },
 
   getCurrentUser: (): User | null => {
-    const user = localStorage.getItem("presyo_user");
+    const user = sessionStorage.getItem("presyo_user");
     return user ? JSON.parse(user) : null;
   },
 

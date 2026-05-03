@@ -12,7 +12,8 @@ import {
   ChevronRight,
   Menu,
   X,
-  Fingerprint
+  Fingerprint,
+  ShieldOff
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { bufferToBase64URL } from "../lib/webauthnUtils";
@@ -90,6 +91,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, title, activePath }) =
     } catch (err) {
       console.error(err);
       alert("Failed to register passkey. " + (err instanceof Error ? err.message : ""));
+    }
+  };
+
+  const handleClearPasskey = () => {
+    if (confirm("Are you sure you want to clear your registered passkey? You will need to use your password to login next time.")) {
+      api.clearPasskey();
+      setHasPasskey(false);
+      alert("Passkey cleared successfully.");
     }
   };
 
@@ -219,6 +228,17 @@ export const Layout: React.FC<LayoutProps> = ({ children, title, activePath }) =
               >
                 <Fingerprint className="h-4 w-4 text-primary" />
                 <span className="hidden sm:inline">Enable Passkey</span>
+              </Button>
+            )}
+            {hasPasskey && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClearPasskey}
+                className="flex gap-2 border-destructive/20 hover:bg-destructive/5 text-destructive"
+              >
+                <ShieldOff className="h-4 w-4" />
+                <span className="hidden sm:inline">Clear Passkey</span>
               </Button>
             )}
             <ThemeToggle />
