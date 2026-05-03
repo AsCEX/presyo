@@ -52,7 +52,7 @@ const saveProducts = (products: Product[]) => {
 
 export const api = {
   login: async (username: string, password: string): Promise<{ ok: boolean; json: () => Promise<any> }> => {
-    if (username === "admin" && password === "admin") {
+    if (username === "admin" && password === "618b1a07-a72d-4f68-85a7-88596bc35a08") {
       const user: User = { id: 1, username: "admin", name: "Administrator" };
       sessionStorage.setItem("presyo_user", JSON.stringify(user));
       return mockFetch(user);
