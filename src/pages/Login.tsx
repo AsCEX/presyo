@@ -18,6 +18,9 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     // Check if WebAuthn is supported and if user has a registered passkey
     if (window.PublicKeyCredential) {
       setIsWebAuthnSupported(true);
+      if (api.hasPasskey()) {
+        handleWebAuthnLogin();
+      }
     }
   }, []);
 
