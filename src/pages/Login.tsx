@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { api } from "../api/mockApi";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { Fingerprint } from "lucide-react";
+import { base64URLToBuffer } from "../lib/webauthnUtils";
 
 interface LoginProps {
   onLoginSuccess: () => void;
@@ -23,13 +24,42 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const handleWebAuthnLogin = async () => {
     setError(null);
     try {
-      // In a real app, we would call navigator.credentials.get() here
-      const response = await api.webAuthnLogin();
-      if (response.ok) {
-        onLoginSuccess();
+      const storedPasskey = api.getPasskeyData();
+      if (!storedPasskey) {
+        setError("No passkey registered on this device");
+        return;
+      }
+
+      const challenge = new Uint8Array(32);
+      window.crypto.getRandomValues(challenge);
+
+      const publicKeyCredentialRequestOptions: PublicKeyCredentialRequestOptions = {
+        challenge,
+        allowCredentials: [
+          {
+            id: base64URLToBuffer(storedPasskey.rawId),
+            type: "public-key",
+          },
+        ],
+        userVerification: "required",
+        timeout: 60000,
+      };
+
+      const assertion = (await navigator.credentials.get({
+        publicKey: publicKeyCredentialRequestOptions,
+      })) as PublicKeyCredential;
+
+      if (assertion) {
+        const response = await api.webAuthnLogin(assertion.id);
+        if (response.ok) {
+          onLoginSuccess();
+        } else {
+          setError("Passkey authentication failed");
+        }
       }
     } catch (err) {
-      setError("Passkey authentication failed");
+      console.error(err);
+      setError("Passkey authentication failed: " + (err instanceof Error ? err.message : ""));
     }
   };
 

@@ -15,6 +15,7 @@ import {
   Fingerprint
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { bufferToBase64URL } from "../lib/webauthnUtils";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -42,12 +43,53 @@ export const Layout: React.FC<LayoutProps> = ({ children, title, activePath }) =
 
   const handleRegisterPasskey = async () => {
     try {
-      // In a real app, we would call navigator.credentials.create() here
-      await api.registerPasskey();
-      setHasPasskey(true);
-      alert("Passkey registered successfully! You can now use biometrics to login.");
+      const challenge = new Uint8Array(32);
+      window.crypto.getRandomValues(challenge);
+      const userID = new Uint8Array(16);
+      window.crypto.getRandomValues(userID);
+
+      const publicKeyCredentialCreationOptions: PublicKeyCredentialCreationOptions = {
+        challenge,
+        rp: {
+          name: "Presyo",
+          id: window.location.hostname,
+        },
+        user: {
+          id: userID,
+          name: user?.username || "admin",
+          displayName: user?.name || "Administrator",
+        },
+        pubKeyCredParams: [
+          { alg: -7, type: "public-key" }, // ES256
+          { alg: -257, type: "public-key" } // RS256
+        ],
+        authenticatorSelection: {
+          authenticatorAttachment: "platform",
+          residentKey: "required",
+          requireResidentKey: true,
+          userVerification: "required",
+        },
+        timeout: 60000,
+        attestation: "none",
+      };
+
+      const credential = (await navigator.credentials.create({
+        publicKey: publicKeyCredentialCreationOptions,
+      })) as PublicKeyCredential;
+
+      if (credential) {
+        const credentialData = {
+          id: credential.id,
+          rawId: bufferToBase64URL(credential.rawId),
+          type: credential.type,
+        };
+        await api.registerPasskey(credentialData);
+        setHasPasskey(true);
+        alert("Passkey registered successfully! You can now use biometrics to login.");
+      }
     } catch (err) {
-      alert("Failed to register passkey.");
+      console.error(err);
+      alert("Failed to register passkey. " + (err instanceof Error ? err.message : ""));
     }
   };
 

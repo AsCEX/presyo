@@ -60,19 +60,28 @@ export const api = {
     return mockFetch({ message: "Invalid credentials" }, false);
   },
 
-  webAuthnLogin: async (): Promise<{ ok: boolean; json: () => Promise<any> }> => {
-    const hasPasskey = localStorage.getItem("presyo_passkey");
-    if (hasPasskey) {
-      const user: User = { id: 1, username: "admin", name: "Administrator" };
-      localStorage.setItem("presyo_user", JSON.stringify(user));
-      return mockFetch(user);
+  webAuthnLogin: async (credentialId: string): Promise<{ ok: boolean; json: () => Promise<any> }> => {
+    const storedCredential = localStorage.getItem("presyo_passkey_data");
+    if (storedCredential) {
+      const parsed = JSON.parse(storedCredential);
+      if (parsed.id === credentialId) {
+        const user: User = { id: 1, username: "admin", name: "Administrator" };
+        localStorage.setItem("presyo_user", JSON.stringify(user));
+        return mockFetch(user);
+      }
     }
-    return mockFetch({ message: "No passkey registered" }, false);
+    return mockFetch({ message: "Invalid passkey" }, false);
   },
 
-  registerPasskey: async (): Promise<{ ok: boolean; json: () => Promise<any> }> => {
+  registerPasskey: async (credentialData: any): Promise<{ ok: boolean; json: () => Promise<any> }> => {
     localStorage.setItem("presyo_passkey", "true");
+    localStorage.setItem("presyo_passkey_data", JSON.stringify(credentialData));
     return mockFetch({ success: true });
+  },
+
+  getPasskeyData: (): any => {
+    const data = localStorage.getItem("presyo_passkey_data");
+    return data ? JSON.parse(data) : null;
   },
 
   hasPasskey: (): boolean => {
