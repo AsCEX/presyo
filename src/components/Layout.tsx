@@ -173,10 +173,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, title, activePath }) =
                 variant="outline"
                 size="sm"
                 onClick={handleRegisterPasskey}
-                className="hidden gap-2 md:flex border-primary/20 hover:bg-primary/5"
+                className="flex gap-2 border-primary/20 hover:bg-primary/5"
               >
                 <Fingerprint className="h-4 w-4 text-primary" />
-                <span>Enable Passkey</span>
+                <span className="hidden sm:inline">Enable Passkey</span>
               </Button>
             )}
             <ThemeToggle />
